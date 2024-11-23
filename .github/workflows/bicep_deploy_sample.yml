@@ -1,23 +1,52 @@
-name: Build and Upload Artifacts Sample
+name: Deploy Bicep using ARM Deploy
 
 on:
   workflow_dispatch:
+    inputs:
+      environmentType:
+        description: 'Environment type (nonprod or prod)'
+        required: true
+        default: 'nonprod'
+      deployAmeretatManualsStorageAccount:
+        description: 'Deploy Ameretat Manuals Storage Account (true or false)'
+        required: true
+        default: 'true'
+      resourceNameSuffix:
+        description: 'Resource name suffix'
+        required: false
+        default: ''
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      
-      - name: Build project
-        run: |
-          echo "Building the project..."
-          mkdir -p output
-          echo "This is a sample file." > output/sample.txt
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifact
-          path: output/sample.txt
+    steps:
+    # Azure CLIでのログイン
+    - name: 'Login to Azure'
+      uses: azure/login@v1
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    # 必要に応じてリポジトリをチェックアウト
+    - name: 'Checkout repository'
+      uses: actions/checkout@v3
+
+    # ARM Deployを使用したBicepファイルのデプロイ
+    - name: 'Deploy Bicep file'
+      uses: azure/arm-deploy@v1
+      with:
+        subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        resourceGroupName: ${{ secrets.AZURE_RG_NAME }}
+        template: deploy/main.bicep
+        parameters: |
+          location=japaneast
+          environmentType=${{ github.event.inputs.environmentType }}
+          deployAmeretatManualsStorageAccount=${{ github.event.inputs.deployAmeretatManualsStorageAccount }}
+          resourceNameSuffix=${{ github.event.inputs.resourceNameSuffix }}
+        deploymentMode: Incremental
