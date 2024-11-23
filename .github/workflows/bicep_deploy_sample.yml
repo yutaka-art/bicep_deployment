@@ -41,8 +41,7 @@ jobs:
         resourceGroupName: ${{ secrets.AZURE_RG_NAME }}
         template: deploy/main.bicep
         parameters: >
-          'location=japaneast
-          environmentType=${{ github.event.inputs.environmentType }}
+          'environmentType=${{ github.event.inputs.environmentType }}
           deployAmeretatManualsStorageAccount=${{ github.event.inputs.deployAmeretatManualsStorageAccount }}
         deploymentMode: Incremental
         failOnStdErr: false
