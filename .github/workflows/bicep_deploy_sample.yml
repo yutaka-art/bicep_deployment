@@ -35,8 +35,8 @@ jobs:
 
     - name: 'Set parameters as environment variables'
       run: |
-        echo "ENVIRONMENT_TYPE=${{ github.event.inputs.environmentType }}" >> $GITHUB_ENV
-        echo "DEPLOY_AMERETAT_STORAGE=${{ github.event.inputs.deployAmeretatManualsStorageAccount }}" >> $GITHUB_ENV
+        echo "ENVIRONMENT_TYPE=${{ github.event.inputs.environmentType }}"
+        echo "DEPLOY_AMERETAT_STORAGE=${{ github.event.inputs.deployAmeretatManualsStorageAccount }}"
 
     # ARM Deployを使用したBicepファイルのデプロイ
     - name: 'Deploy Bicep file'
@@ -46,8 +46,8 @@ jobs:
         resourceGroupName: ${{ secrets.AZURE_RG_NAME }}
         template: deploy/main.bicep
         parameters: >
-          environmentType=$ENVIRONMENT_TYPE
-          deployAmeretatManualsStorageAccount=$DEPLOY_AMERETAT_STORAGE
+          environmentType=${{ github.event.inputs.environmentType }}
+          deployAmeretatManualsStorageAccount=${{ github.event.inputs.deployAmeretatManualsStorageAccount }}
         deploymentMode: Incremental
         failOnStdErr: false
 
