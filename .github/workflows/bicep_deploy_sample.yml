@@ -3,6 +3,10 @@ name: Deploy Bicep using ARM Deploy
 on:
   workflow_dispatch:
     inputs:
+      azureRgName:
+        description: 'Azure Resource Group Name'
+        required: true
+        default: 'rg-bicep-osa-002'
       environmentType:
         description: 'Environment type (nonprod or prod)'
         required: true
@@ -12,6 +16,8 @@ on:
         required: true
         default: 'true'
 
+# OIDC認証を使用してAzureにログインしている場合（id-token: write が必要）
+# リポジトリからBicepファイルを取得している場合（contents: read が必要）
 permissions:
   id-token: write
   contents: read
@@ -33,6 +39,7 @@ jobs:
     - name: 'Checkout repository'
       uses: actions/checkout@v3
 
+    # 定義したパラメータを確認
     - name: 'Set parameters as environment variables'
       run: |
         echo "ENVIRONMENT_TYPE=${{ github.event.inputs.environmentType }}"
@@ -43,11 +50,10 @@ jobs:
       uses: azure/arm-deploy@v1
       with:
         subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        resourceGroupName: ${{ secrets.AZURE_RG_NAME }}
+        resourceGroupName: ${{ github.event.inputs.azureRgName }}
         template: deploy/main.bicep
         parameters: >
           environmentType=${{ github.event.inputs.environmentType }}
           deployAmeretatManualsStorageAccount=${{ github.event.inputs.deployAmeretatManualsStorageAccount }}
         deploymentMode: Incremental
         failOnStdErr: false
-
