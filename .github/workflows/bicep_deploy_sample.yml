@@ -1,0 +1,23 @@
+name: Build and Upload Artifacts Sample
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Build project
+        run: |
+          echo "Building the project..."
+          mkdir -p output
+          echo "This is a sample file." > output/sample.txt
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifact
+          path: output/sample.txt
